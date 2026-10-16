@@ -1,0 +1,31 @@
+# Python 3.14.4 (系统解释器 /usr/bin/python3.14, riscv64) — 重建命令:
+#   export UV_CACHE_DIR=$PWD/.uv-cache
+#   ~/.local/bin/uv venv .venv --python /usr/bin/python3.14
+#   ~/.local/bin/uv pip install --python .venv/bin/python \
+#     --index-url https://git.spacemit.com/api/v4/projects/33/packages/pypi/simple \
+#     -r requirements.txt
+#
+# 索引：只用 SpacemiT 下游索引（riscv64 预编译轮子），不加 --extra-index-url。
+#   uv 中 --extra-index-url 优先级高于 --index-url，混源会把包解析成 sdist 源码编译。
+#
+# 版本说明（实测）：
+#   opencv-python 5.0.0.93 = cp314-abi3 轮子，包内带 cv2/config-3.14.py，
+#     在 Python 3.14 上正常。注意同一版本的 cp310-abi3 变体在 Python 3.12 上
+#     会因缺 config-3.12.py 而 import 失败，选轮子时必须核对包内 config 文件。
+#   onnxruntime 1.24.2+spacemit.a1 = cp314-cp314 轮子，cp314 上的最高版本。
+#   numpy 2.5.3 = 与 opencv 5.0.0.93 兼容（3.12 线上 opencv 4.12 会把 numpy 锁到 <2.3）。
+
+flatbuffers==25.12.19
+mpmath==1.3.0
+numpy==2.5.3
+onnxruntime==1.24.2+spacemit.a1
+opencv-python==5.0.0.93
+packaging==25.0
+# 2026-10-14：SpacemiT 索引已无 7.36.1，改用补丁版 7.36.2，其余版本与情绪晴雨表一致
+protobuf==7.36.2
+sympy==1.14.0
+
+# Vision 0.1.4 对应 /opt/opencv-spacemit 的 OpenCV 5.0 系统库。
+# pyyaml 为 Vision 依赖；系统库版本也必须与此锁定版本匹配。
+pyyaml==6.0.3
+spacemit_vision==0.1.4

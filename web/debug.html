@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木头人调试</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/debug.css">
+</head>
+<body>
+<header class="bar">
+  <h1>木头人调试</h1>
+  <span id="conn" class="pill">连接中</span>
+  <span id="phase" class="pill"></span>
+  <a href="/" class="link">玩家大屏</a>
+</header>
+<main class="grid">
+  <section class="panel preview-panel">
+    <h2>画面</h2>
+    <canvas id="preview" aria-label="摄像头实时画面"></canvas>
+    <dl class="metrics" id="metrics"></dl>
+  </section>
+
+  <section class="panel chart-panel">
+    <h2>判定值</h2>
+    <canvas id="chart" aria-label="红灯期间玩家判定值与阈值"></canvas>
+    <p class="hint" id="chart-hint">红灯判定阶段才有数据。深色线是扣除抖动范围后的判定值，浅色线是未扣除的原始位移，红色虚线是当前难度的阈值。</p>
+  </section>
+
+  <section class="panel">
+    <h2>游戏</h2>
+    <div class="buttons">
+      <button type="button" data-game="start">开始</button>
+      <button type="button" data-game="stop">停止</button>
+      <button type="button" data-game="pause">暂停</button>
+      <button type="button" data-game="resume">继续</button>
+    </div>
+    <p class="hint" id="game-msg"></p>
+    <h3>录制</h3>
+    <div class="buttons">
+      <button type="button" data-record="start">开始录制</button>
+      <button type="button" data-record="stop">停止录制</button>
+    </div>
+    <p class="hint" id="record-msg">录制文件保存在 K3 的 recordings/ 下，用 tools/replay.py 回放调阈值。</p>
+  </section>
+
+  <section class="panel">
+    <h2>舵机</h2>
+    <p class="hint" id="servo-msg"></p>
+    <div class="buttons">
+      <button type="button" data-position="standby">待机</button>
+      <button type="button" data-position="face">面对玩家</button>
+      <button type="button" data-position="back">背对玩家</button>
+    </div>
+    <div class="field">
+      <label for="us">脉宽（μs）</label>
+      <div class="inline">
+        <input id="us-range" type="range" min="500" max="2500" step="10" value="1500" aria-label="脉宽滑块">
+        <input id="us" type="number" min="500" max="2500" step="10" value="1500">
+        <button type="button" id="us-go">转到</button>
+      </div>
+    </div>
+    <div class="buttons">
+      <button type="button" data-mark="face">当前脉宽记为面对</button>
+      <button type="button" data-mark="back">当前脉宽记为背对</button>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="speed">转速（μs/秒）</label><input id="speed" type="number" min="100" step="50"></div>
+      <div class="field"><label for="settle">停稳等待（秒）</label><input id="settle" type="number" min="0" step="0.05"></div>
+    </div>
+    <p class="hint">游戏进行中不能手动转动。标定后点"应用并保存"写入配置文件。</p>
+  </section>
+
+  <section class="panel config-panel">
+    <h2>规则</h2>
+    <form id="config" class="form"></form>
+    <div class="buttons">
+      <button type="button" id="apply">应用</button>
+      <button type="button" id="save">应用并保存</button>
+    </div>
+    <p class="hint" id="config-msg">"应用"只改内存，重启服务后恢复；"应用并保存"写入 configs/。</p>
+  </section>
+
+  <section class="panel log-panel">
+    <h2>事件</h2>
+    <pre id="log"></pre>
+  </section>
+</main>
+<script type="module" src="js/debug.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "rounds": 3,
+  "countdown_s": 3,
+  "green_s": [
+    3,
+    5
+  ],
+  "red_s": [
+    3,
+    5
+  ],
+  "grace_s": 1.0,
+  "safe_s": 1.5,
+  "result_hold_s": 8,
+  "lost_frames": 8,
+  "unclear_policy": "pass",
+  "language": "zh",
+  "poses": [
+    "raise_left",
+    "raise_right",
+    "both_up",
+    "hands_on_hips",
+    "t_pose"
+  ],
+  "difficulty": "normal",
+  "difficulties": {
+    "easy": {
+      "threshold": 0.15,
+      "consecutive": 4
+    },
+    "normal": {
+      "threshold": 0.1,
+      "consecutive": 3
+    },
+    "hard": {
+      "threshold": 0.06,
+      "consecutive": 2
+    }
+  },
+  "jitter_floor": 0.03,
+  "still_threshold": 2.5,
+  "still_frames": 4,
+  "settle_timeout_s": 3.0
+}

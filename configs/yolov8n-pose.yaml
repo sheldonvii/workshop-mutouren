@@ -1,0 +1,13 @@
+# YOLOv8n-Pose 姿态估计配置（基于 /opt/spacemit-ai-gateway/configs/vision/yolov8n-pose.yaml，改了路径）
+# 模型来源: https://archive.spacemit.com/spacemit-ai/model_zoo/vision/yolov8_pose/yolov8n-pose.q.onnx
+# sha256: 7a46bf4e4739548d9954e69ea21e24df70ef25d47d23fd70de2bebe4e55d511c
+model_path: models/yolov8n-pose.q.onnx
+label_file_path: configs/coco.txt
+image_size: [640, 640]
+class: deploy.yolov8_pose.YOLOv8PoseDetector
+default_params:
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  num_threads: 4
+  providers:
+    - SpaceMITExecutionProvider

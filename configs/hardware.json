@@ -1,0 +1,43 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8322
+  },
+  "camera": {
+    "device": 1,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "fourcc": "MJPG",
+    "controls": {
+      "auto_exposure": 3,
+      "white_balance_automatic": 1,
+      "focus_automatic_continuous": 0
+    }
+  },
+  "preview": {
+    "width": 640,
+    "quality": 75
+  },
+  "vision": {
+    "config": "configs/yolov8m-pose.yaml",
+    "min_score": 0.5,
+    "min_keypoints": 5,
+    "keypoint_min_visibility": 0.5
+  },
+  "servo": {
+    "driver": "gpio",
+    "chip_label": "d4019000.gpio-bank0",
+    "line": 29,
+    "fpc_pin": 12,
+    "cpu": 7,
+    "positions": {
+      "standby": 1500,
+      "face": 1500,
+      "back": 2500
+    },
+    "speed_us_per_s": 1500,
+    "settle_s": 0.4,
+    "hold": "release"
+  }
+}

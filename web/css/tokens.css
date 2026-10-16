@@ -1,0 +1,71 @@
+/* 设计 token，见 docs/前端设计调研.md 第 3 节。玩家大屏和调试页共用。 */
+
+@font-face {
+  font-family: "Field Stencil";
+  src: url("../fonts/big-shoulders-stencil-display-latin-900.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Field Stencil";
+  src: url("../fonts/big-shoulders-stencil-display-latin-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --sky: #8fc9dc;
+  --green: #136b5e;
+  --red: #e23d5e;
+  --sand: #d6ae6b;
+  --bib: #f5f6f1;
+  --ink: #18213a;
+
+  --ink-72: rgb(24 33 58 / 0.72);
+  --ink-12: rgb(24 33 58 / 0.12);
+  --bib-72: rgb(245 246 241 / 0.72);
+  --bib-35: rgb(245 246 241 / 0.35);
+
+  /* 物件（摄像头面板、号码布、按钮、标签）统一圆角；色块一律直角 */
+  --radius: 12px;
+
+  --font-cjk: "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-num: "Field Stencil", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+
+  --ease-turn: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-cjk);
+  color: var(--ink);
+  background: var(--sky);
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+}
+
+button {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 4px solid var(--ink);
+  outline-offset: 4px;
+}

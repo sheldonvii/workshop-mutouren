@@ -1,0 +1,651 @@
+/* 玩家大屏。屏幕上半是"墙"（颜色随游戏阶段变化），下半是"沙地"（常驻信息），交界是一条起点线。
+   尺寸都以 .screen 为容器（cqh/cqw），设计稿里缩小的画框和全屏页面用同一套比例。 */
+
+.screen {
+  container: screen / size;
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-cjk);
+  --wall: var(--sky);
+  --wall-ink: var(--ink);
+  --wall-ink-soft: var(--ink-72);
+}
+
+.screen[data-phase="green"],
+.screen[data-phase="safe"],
+.screen[data-phase="win"] {
+  --wall: var(--green);
+  --wall-ink: var(--bib);
+  --wall-ink-soft: var(--bib-72);
+}
+
+/* 红墙上的次要文字对比度不足，保持全色 */
+.screen[data-phase="turning"],
+.screen[data-phase="red"] {
+  --wall: var(--red);
+  --wall-ink: var(--bib);
+  --wall-ink-soft: var(--bib);
+}
+
+.screen[data-phase="eliminated"] {
+  --wall: var(--ink);
+  --wall-ink: var(--bib);
+  --wall-ink-soft: var(--bib-72);
+}
+
+/* ---- 墙 ---- */
+
+.wall {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52cqw;
+  align-items: center;
+  gap: 4cqw;
+  padding: 6cqh 5cqw 5cqh;
+  background: var(--wall);
+  color: var(--wall-ink);
+}
+
+.copy {
+  min-width: 0;
+}
+
+.state-word {
+  margin: 0;
+  font-weight: 900;
+  font-size: 26cqh;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.state-word--title {
+  font-size: 13cqh;
+  line-height: 1.08;
+}
+
+.state-line {
+  margin: 2.4cqh 0 0;
+  max-width: 20em;
+  font-size: 4.4cqh;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--wall-ink-soft);
+}
+
+.state-note {
+  margin: 1.6cqh 0 0;
+  font-size: 3.2cqh;
+  font-weight: 500;
+  color: var(--wall-ink-soft);
+}
+
+.state-reason {
+  margin: 2cqh 0 0;
+  font-size: 9cqh;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.count {
+  display: block;
+  font-family: var(--font-num);
+  font-weight: 900;
+  font-size: 40cqh;
+  line-height: 0.85;
+}
+
+/* 口令：逐字点亮，中文两行各三字，韩语两行各五字 */
+.chant {
+  display: grid;
+  grid-template-columns: repeat(3, 1em);
+  gap: 0 0.18em;
+  margin: 0;
+  font-weight: 900;
+  font-size: 14cqh;
+  line-height: 1.1;
+}
+
+.chant:lang(ko) {
+  grid-template-columns: repeat(5, 1em);
+  gap: 0 0.12em;
+  font-size: 8cqh;
+}
+
+.chant span {
+  opacity: 0.3;
+  transition: opacity 0.12s linear;
+}
+
+.chant span.sung {
+  opacity: 1;
+}
+
+.pose-prompt {
+  display: flex;
+  align-items: center;
+  gap: 2.4cqw;
+  margin-top: 4cqh;
+}
+
+.pose-prompt canvas {
+  flex: none;
+  width: 24cqh;
+  height: 28cqh;
+}
+
+.pose-prompt .label {
+  margin: 0;
+  font-size: 3.2cqh;
+  font-weight: 500;
+  color: var(--wall-ink-soft);
+}
+
+.pose-prompt .name {
+  margin: 0.6cqh 0 0;
+  font-size: 7cqh;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+/* 晃动曲线：最近几秒的判定值，虚线是淘汰线 */
+.tremor {
+  margin: 4cqh 0 0;
+}
+
+.tremor canvas {
+  display: block;
+  width: 100%;
+  height: 16cqh;
+}
+
+.tremor figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin-top: 1.2cqh;
+  font-size: 3.2cqh;
+  font-weight: 500;
+}
+
+/* ---- 摄像头面板：玩偶的头。舵机转向时翻转，时长取舵机预计转动时间 ---- */
+
+.head {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  perspective: 2400px;
+}
+
+.head-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform var(--turn-ms, 700ms) var(--ease-turn);
+}
+
+.head[data-facing="back"] .head-inner {
+  transform: rotateY(180deg);
+}
+
+.head-face,
+.head-back {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  backface-visibility: hidden;
+  background: var(--ink);
+  box-shadow: 0 2cqh 5cqh rgb(24 33 58 / 0.28);
+}
+
+.head-face canvas,
+.head-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 抓拍是未镜像的原始帧，显示时与实时画面一样镜像 */
+.head-face img.mirror {
+  transform: scaleX(-1);
+}
+
+.head-back {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2cqh;
+  transform: rotateY(180deg);
+  color: var(--bib);
+  font-size: 4.4cqh;
+  font-weight: 700;
+}
+
+.head-back svg {
+  width: 12cqh;
+  height: 12cqh;
+}
+
+/* 扫描线：进入红灯宽限期时从上到下扫一次 */
+.scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent calc(100% - 1.2cqh), var(--bib) calc(100% - 1.2cqh));
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.head.scanning .scan {
+  animation: scan var(--scan-ms, 800ms) linear 1 forwards;
+}
+
+@keyframes scan {
+  from {
+    opacity: 0.9;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+.tag {
+  position: absolute;
+  left: 1.6cqh;
+  bottom: 1.6cqh;
+  padding: 0.6cqh 1.2cqh;
+  border-radius: calc(var(--radius) / 2);
+  background: rgb(24 33 58 / 0.72);
+  color: var(--bib);
+  font-size: 2.4cqh;
+  font-weight: 500;
+}
+
+/* ---- 沙地 ---- */
+
+.ground {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2cqh 3.5cqw;
+  min-height: 22cqh;
+  padding: 2.4cqh 5cqw;
+  border-top: 1.4cqh solid var(--bib);
+  background: var(--sand);
+  color: var(--ink);
+  font-size: 3.2cqh;
+  font-weight: 500;
+}
+
+.ground .push {
+  margin-left: auto;
+}
+
+.bib {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: 1cqh 2.4cqh 1.4cqh;
+  border-radius: var(--radius);
+  background: var(--bib);
+  color: var(--ink);
+}
+
+.bib-label {
+  font-size: 2.4cqh;
+}
+
+.bib-no {
+  font-family: var(--font-num);
+  font-weight: 900;
+  font-size: 10cqh;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+/* 淘汰时号码布被划掉 */
+.bib::after {
+  content: "";
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  top: 48%;
+  height: 1.2cqh;
+  background: var(--red);
+  transform: rotate(-14deg) scaleX(0);
+  transform-origin: left center;
+}
+
+.screen[data-phase="eliminated"] .bib::after {
+  transform: rotate(-14deg) scaleX(1);
+  transition: transform 0.4s var(--ease-out) 0.2s;
+}
+
+.round {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6cqw;
+}
+
+.round .num {
+  font-family: var(--font-num);
+  font-weight: 900;
+  font-size: 10cqh;
+  line-height: 0.9;
+}
+
+.round .of {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: 6cqh;
+  color: var(--ink-72);
+}
+
+.pose-chip {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqh;
+  padding: 1cqh 2cqh;
+  border-radius: var(--radius);
+  background: rgb(245 246 241 / 0.55);
+}
+
+.pose-chip canvas {
+  width: 8cqh;
+  height: 9cqh;
+}
+
+.pose-chip svg {
+  width: 4cqh;
+  height: 4cqh;
+}
+
+.note {
+  font-size: 2.4cqh;
+  color: var(--ink-72);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.6cqh;
+  padding: 2cqh 3.2cqh;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--bib);
+  font-size: 4.4cqh;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action:active {
+  transform: translateY(1px);
+}
+
+.action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.action kbd {
+  padding: 0.4cqh 1cqh;
+  border: 2px solid var(--bib-35);
+  border-radius: calc(var(--radius) / 2);
+  font-family: inherit;
+  font-size: 2.4cqh;
+  font-weight: 500;
+}
+
+/* ---- 竖屏或窄窗口：面板移到文字上方，尺寸改按宽度计 ---- */
+
+@container screen (aspect-ratio < 1) {
+  .wall {
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 4cqw;
+    padding: 5cqw;
+  }
+
+  .head {
+    order: -1;
+  }
+
+  .state-word {
+    font-size: 24cqw;
+  }
+
+  .state-word--title {
+    font-size: 13cqw;
+  }
+
+  .state-line {
+    font-size: 5cqw;
+  }
+
+  .chant {
+    font-size: 14cqw;
+  }
+
+  .ground {
+    min-height: 0;
+    padding: 4cqw 5cqw;
+    font-size: 4cqw;
+  }
+
+  .bib-no,
+  .round .num {
+    font-size: 11cqw;
+  }
+
+  .action {
+    font-size: 5cqw;
+  }
+}
+
+/* ---- 动效：都对应真实的游戏状态 ---- */
+
+.wall {
+  position: relative;
+  isolation: isolate;
+}
+
+.wall > .copy,
+.wall > .head {
+  position: relative;
+  z-index: 1;
+}
+
+/* 换墙色：新颜色从摄像头面板（玩偶的头）向外扩散。.wipe 盖着旧颜色，中间的洞越开越大 */
+@property --hole {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--wipe-from, transparent);
+  -webkit-mask-image: radial-gradient(circle at var(--ox, 75%) var(--oy, 50%), transparent var(--hole), #000 calc(var(--hole) + 2px));
+  mask-image: radial-gradient(circle at var(--ox, 75%) var(--oy, 50%), transparent var(--hole), #000 calc(var(--hole) + 2px));
+}
+
+.wipe.go {
+  opacity: 1;
+  animation: wipe 560ms var(--ease-turn) forwards;
+}
+
+@keyframes wipe {
+  from {
+    --hole: 0px;
+  }
+  to {
+    --hole: 4200px;
+  }
+}
+
+/* 淘汰：像灯坏了一样闪两下再熄灭 */
+.wipe.blackout {
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: blackout 460ms steps(1, end) forwards;
+}
+
+@keyframes blackout {
+  0% { opacity: 1; }
+  28% { opacity: 0; }
+  42% { opacity: 1; }
+  58% { opacity: 0; }
+  70% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* 状态大字像盖章一样落下，墙上的内容跟着震一下 */
+.stamp {
+  transform-origin: 30% 60%;
+  animation: stamp 320ms var(--ease-out) both;
+}
+
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.7) rotate(-4deg); }
+  60% { opacity: 1; transform: scale(0.94) rotate(0deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+.wall.shake > .copy,
+.wall.shake > .head {
+  animation: shake 280ms linear 1;
+}
+
+@keyframes shake {
+  0%, 100% { transform: none; }
+  20% { transform: translate(-0.8cqh, 0.4cqh); }
+  40% { transform: translate(0.7cqh, -0.5cqh); }
+  60% { transform: translate(-0.5cqh, 0.3cqh); }
+  80% { transform: translate(0.3cqh, -0.2cqh); }
+}
+
+/* 口令：唱到哪个字，哪个字弹出来 */
+.chant span.sung {
+  animation: syllable 220ms var(--ease-out) both;
+}
+
+@keyframes syllable {
+  from { transform: scale(1.35) translateY(-0.1em); }
+  to { transform: none; }
+}
+
+/* 判定值接近淘汰线时，"别动"开始发抖 */
+.screen[data-danger] .state-word {
+  animation: shiver 90ms linear infinite;
+}
+
+@keyframes shiver {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(0.3cqh, -0.2cqh); }
+  50% { transform: translate(-0.25cqh, 0.25cqh); }
+  75% { transform: translate(0.2cqh, 0.15cqh); }
+}
+
+.rise {
+  animation: rise 360ms var(--ease-out) 180ms both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(2cqh); }
+  to { opacity: 1; transform: none; }
+}
+
+.roll {
+  display: inline-block;
+  animation: roll 360ms var(--ease-out) both;
+}
+
+@keyframes roll {
+  from { opacity: 0; transform: translateY(60%); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 面板停稳时轻轻落定 */
+.head.landed .head-inner {
+  animation: land 260ms var(--ease-out) 1;
+}
+
+@keyframes land {
+  0% { scale: 1; }
+  40% { scale: 1.025; }
+  100% { scale: 1; }
+}
+
+/* 胜利：运动会配色的彩纸 */
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti i {
+  position: absolute;
+  top: -4cqh;
+  width: 1.4cqh;
+  height: 2.6cqh;
+  background: var(--c);
+  animation: fall var(--d) linear var(--delay) forwards;
+}
+
+@keyframes fall {
+  to { transform: translate(var(--dx), 112cqh) rotate(var(--r)); }
+}
+
+.conn {
+  position: absolute;
+  top: 2cqh;
+  left: 50%;
+  z-index: 4;
+  padding: 1cqh 2.4cqh;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--bib);
+  font-size: 2.8cqh;
+  font-weight: 500;
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall,
+  .head-inner,
+  .chant span,
+  .screen[data-phase="eliminated"] .bib::after {
+    transition: none;
+  }
+
+  .scan,
+  .wipe,
+  .confetti {
+    display: none;
+  }
+
+  .stamp,
+  .wall.shake > .copy,
+  .wall.shake > .head,
+  .chant span.sung,
+  .screen[data-danger] .state-word,
+  .rise,
+  .roll,
+  .head.landed .head-inner {
+    animation: none;
+  }
+}

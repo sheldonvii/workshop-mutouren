@@ -1,0 +1,8 @@
+.venv/
+.uv-cache/
+models/*.onnx
+models/*.part
+recordings/
+snapshots/
+logs/
+__pycache__/

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一二三木头人</title>
+<link rel="icon" href="data:,">
+<link rel="preload" href="fonts/big-shoulders-stencil-display-latin-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/player.css">
+<style>
+  body { background: var(--ink); overflow: hidden; }
+  .kiosk { width: 100vw; height: 100dvh; }
+</style>
+</head>
+<body>
+<main class="screen kiosk" id="screen" data-phase="idle">
+  <section class="wall" id="wall">
+    <div class="wipe" id="wipe" aria-hidden="true"></div>
+    <div class="copy" aria-live="polite">
+      <h1 class="state-word state-word--title" id="word">一二三，<br>木头人</h1>
+      <span class="count" id="count" hidden></span>
+      <p class="chant" id="chant" hidden></p>
+      <p class="state-reason" id="reason" hidden></p>
+      <p class="state-line" id="line">正在连接</p>
+      <p class="state-note" id="note" hidden></p>
+      <div class="pose-prompt" id="prompt" hidden>
+        <canvas id="prompt-figure" aria-hidden="true"></canvas>
+        <div><p class="label">转身前摆好</p><p class="name" id="prompt-name"></p></div>
+      </div>
+      <figure class="tremor" id="tremor" hidden>
+        <canvas id="tremor-canvas" aria-hidden="true"></canvas>
+        <figcaption><span>晃动</span><span id="tremor-hint">超过虚线就淘汰</span></figcaption>
+      </figure>
+    </div>
+    <div class="head" id="head" data-facing="face">
+      <div class="head-inner">
+        <div class="head-face">
+          <canvas id="preview" aria-label="摄像头实时画面"></canvas>
+          <img class="mirror" id="snapshot" alt="淘汰时的画面，动了的部位标红" hidden>
+          <div class="scan" aria-hidden="true"></div>
+          <span class="tag" id="tag" hidden></span>
+        </div>
+        <div class="head-back"><i data-lucide="eye-off" aria-hidden="true"></i>背对着你</div>
+      </div>
+    </div>
+  </section>
+  <footer class="ground">
+    <div class="bib" id="bib" hidden><span class="bib-label">号码</span><span class="bib-no" id="bib-no"></span></div>
+    <div class="round"><span class="num" id="round-num">3</span><span class="of" id="round-of" hidden></span><span>轮</span></div>
+    <span id="difficulty"></span>
+    <div class="pose-chip" id="chip" hidden>
+      <canvas id="chip-figure" aria-hidden="true"></canvas>
+      <span id="chip-name"></span>
+      <span id="chip-ok" hidden><i data-lucide="check" aria-label="姿势正确"></i></span>
+      <span id="chip-bad" hidden><i data-lucide="x" aria-label="姿势不对"></i></span>
+      <span id="chip-unknown" hidden><i data-lucide="circle-help" aria-label="姿势看不清"></i></span>
+    </div>
+    <span class="note" id="status"></span>
+    <button class="action push" id="action" type="button" disabled><span id="action-label">开始</span><kbd id="action-key">空格</kbd></button>
+  </footer>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+  <div class="conn" id="conn" hidden>连接断开，正在重连</div>
+</main>
+<script src="vendor/lucide.min.js"></script>
+<script type="module" src="js/player.js"></script>
+</body>
+</html>
