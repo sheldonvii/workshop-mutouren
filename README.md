@@ -90,6 +90,8 @@ node tests/browser_check.mjs                    # 无头浏览器检查页面与
 | `scripts/` | GPIO 权限配置、模型下载校验、服务冒烟检查 |
 | `tools/` | 舵机单独测试、摄像头与舵机联调页、录制回放、模型对比 |
 | `tests/` | 逻辑测试与无头浏览器检查 |
+| [AGENTS.md](AGENTS.md) | 自动化 Agent 与接手开发者的项目结构、设备边界与提交规则 |
+| `docs/code-guide.md` | 代码导读：模块调用关系、改动入口与验证方式 |
 | `docs/hardware.md` | K3 引脚定义、转接板映射、外设规格与供电排障 |
 | `docs/servo.md` | GPIO 软件脉冲原理、时序与实时调度、标定与工具 |
 | `docs/development.md` | 数据流、姿态与判定算法、HTTP 与 WebSocket 接口、参数说明 |
